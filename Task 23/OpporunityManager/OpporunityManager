@@ -1,0 +1,17 @@
+public class OpporunityManager {
+    public static List<Opportunity> getOpps() {
+        Integer todayMonth = Date.today().month();
+        
+        List<Opportunity> oppList = [
+            SELECT Name, CloseDate, StageName 
+            FROM Opportunity 
+        	WHERE 
+            	CreatedDate < N_DAYS_AGO:30 AND
+            	CALENDAR_MONTH(CloseDate) = :todayMonth AND
+            	StageName != 'Closed Won' AND
+            	StageName != 'Closed Lost'
+        ];
+        System.debug(oppList);
+        return oppList;
+    }
+}
