@@ -1,0 +1,50 @@
+({
+	fetchCases : function(component) {
+		let action = component.get('c.getCases');
+        
+        action.setParams({
+            originalCaseId : component.get('v.recordId')
+        });
+        
+        action.setCallback(this, function(res) {
+            let state = res.getState();
+            if(state === 'SUCCESS') {
+                component.set('v.data', res.getReturnValue());
+            }
+        });
+        $A.enqueueAction(action);
+	},
+    
+    mergeButtonClick: function(component, event) {
+        component.set('v.currentDuplRecord', event.getParam('row'));
+        
+        if(
+            (component.get('v.currentDuplRecord').Status === 'In progress' ||
+            component.get('v.currentDuplRecord').Status === 'On Hold') &&
+            !component.get('v.currentDuplRecord').OwnerId.startsWith('00G')
+        ) {
+            component.set('v.isModalOpen', true);
+        } else {
+            this.mergeFire(component, event);
+        }
+    },
+    
+    mergeFire: function(component, event) {
+        let action = component.get('c.mergeCases');
+        console.log(event.getParam('isNotify'));
+        action.setParams({
+            originalCaseId : component.get('v.recordId'),
+            duplicateCase: component.get('v.currentDuplRecord'),
+            isNotify: event.getParam('isNotify')
+        });
+        
+        $A.enqueueAction(action);
+    },
+    
+    closePopUp: function(component, event) {
+        if(event.getParam('isContinue')) {
+            this.mergeFire(component, event);
+        }
+        component.set('v.isModalOpen', event.getParam('isModalOpen'));
+    }
+})
