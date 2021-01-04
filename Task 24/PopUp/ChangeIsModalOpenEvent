@@ -1,5 +1,0 @@
-<aura:event type="COMPONENT">
-    <aura:attribute name="isModalOpen" type="Boolean" />
-    <aura:attribute name="isContinue" type="Boolean" />
-    <aura:attribute name="isNotify" type="Boolean" />
-</aura:event>
