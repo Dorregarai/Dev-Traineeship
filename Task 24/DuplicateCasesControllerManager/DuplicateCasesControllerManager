@@ -1,0 +1,80 @@
+public class DuplicateCasesControllerManager {
+    public static List<Case> getOriginalCase(Id caseId) {
+        List<Case> caseList = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName
+            FROM Case 
+            WHERE Id = :caseId 
+        ];
+        
+        return caseList;
+    }
+    
+    public static List<Case> getDuplicateCaseList(Case originalCase) {
+        List<Case> caseList = [ 
+            SELECT 
+            	CaseNumber,
+            	Origin,
+            	Status,
+            	OwnerId,
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case
+            WHERE 
+            	Id != :originalCase.Id AND 
+            	Status != 'Closed (Resolved)' AND (
+                    Subject = :originalCase.Subject OR
+                    SuppliedEmail = :originalCase.SuppliedEmail OR
+                    Reason = :originalCase.Reason
+                    )
+        ];
+        
+        System.debug(caseList[0]);
+        
+        return caseList;
+    }
+    
+    public static List<EmailMessage> getEmailMessage(Case duplicateCase) {
+        List<EmailMessage> emailMessageList = [
+            SELECT Id, ParentId
+            FROM EmailMessage
+            WHERE Id = :duplicateCase.Id
+        ];
+        
+        return emailMessageList;
+    }
+    
+    public static String notificationMessageSet(Case duplicateCase) {
+        List<User> users =[ SELECT Id, Name, LanguageLocaleKey FROM User WHERE Id = :duplicateCase.OwnerId ];
+        String message;
+        
+        String language = users[0].LanguageLocaleKey;
+        
+        switch on language {
+            when 'en_US' {
+                message = 'Warning: Case №' + duplicateCase.CaseNumber + ' was closed as a duplicate.';
+            }
+            when 'ru' {
+                message = 'Внимание: Обращение №' + duplicateCase.CaseNumber + ' закрыто, как дубликат.';
+            }
+        }
+        
+        return message;
+    }
+}
