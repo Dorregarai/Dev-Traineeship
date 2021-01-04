@@ -1,0 +1,22 @@
+@IsTest
+public class BellNotificationTest {
+    @testSetup
+    public static void setup() {
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+            Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'EN'
+        ));
+        
+        insert casesToTest;
+    }
+    
+	@isTest
+    public static void test() {
+        List<Case> casesToTest = [ SELECT Id, OwnerId FROM Case ];
+        
+        BellNotification.sendNotification('Test message', casesToTest[0].OwnerId);
+    }
+}
