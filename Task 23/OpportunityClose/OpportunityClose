@@ -1,0 +1,32 @@
+public class OpportunityClose implements Database.Batchable<sObject> {
+    public List<Opportunity> start(Database.BatchableContext bc) {
+        return OpporunityManager.getOpps();
+    }
+    
+    public void execute(Database.BatchableContext bc, List<Opportunity> scope) {
+        System.debug(scope);
+        List<Opportunity> oppsToUpdate = new List<Opportunity>();
+        
+        for(Opportunity elem : scope) {
+            elem.StageName = 'Closed Lost';
+            
+            if(elem.CloseDate == null) {
+                elem.CloseDate = Date.today();
+            }
+            
+            oppsToUpdate.add(elem);
+        }
+        
+        update oppsToUpdate;
+    }
+    
+    public void finish(Database.BatchableContext bc) {
+        AsyncApexJob job = [
+            SELECT Id, Status, NumberOfErrors, JobItemsProcessed, TotalJobItems
+            FROM AsyncApexJob
+            WHERE Id = :bc.getJobId()
+        ];
+        
+        System.debug(job);
+    }
+}
