@@ -1,0 +1,19 @@
+public interface ITriggerHandler {
+	void beforeInsert(List<sObject> triggerNew);
+    void afterInsert(List<sObject> triggerNew);
+    void beforeUpdate(
+        List<sObject> triggerNew,
+        Map<Id, sObject> triggerNewMap,
+        List<sObject> triggerOld,
+        Map<Id, sObject> triggerOldMap
+    );
+    void afterUpdate(
+        List<sObject> triggerNew,
+        Map<Id, sObject> triggerNewMap,
+        List<sObject> triggerOld,
+        Map<Id, sObject> triggerOldMap
+    );
+    void beforeDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap);
+    void afterDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap);
+    void afterUndelete(List<sObject> triggerNew, Map<Id, sObject> triggerNewMap);
+}
