@@ -1,0 +1,6 @@
+global class OpportunityCloseScheduledJob implements Schedulable {
+    global void execute(SchedulableContext sc) {
+        OpportunityClose batchObject = new OpportunityClose();
+        Id batchId = Database.executeBatch(batchObject, 2);
+    }
+}
