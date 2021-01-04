@@ -1,0 +1,13 @@
+public class Notification implements Queueable, Database.AllowsCallouts {
+    String message;
+    Id caseOwnerId;
+    
+    public Notification(String message, Id caseOwnerId) {
+        this.message = message;
+        this.caseOwnerId = caseOwnerId;
+    }
+    
+    public void execute(QueueableContext context) {
+        BellNotification.sendNotification(message, caseOwnerId);
+    }
+}
