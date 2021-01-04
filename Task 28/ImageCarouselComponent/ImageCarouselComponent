@@ -1,0 +1,49 @@
+<aura:component 
+                controller="ImageCarouselController" 
+                implements="flexipage:availableForAllPageTypes,force:hasRecordId"
+                access="global"
+                >
+    <aura:attribute 
+                    name="currency" 
+                    type="List" 
+                    default="[
+                                 {'label': 'RUB', 'value': 'RUB'},
+                                 {'label': 'USD', 'value': 'USD'},
+                                 {'label': 'EUR', 'value': 'EUR'},
+                                 {'label': 'BYN', 'value': 'BYN'}, 
+                             ]"
+                    />
+    <aura:attribute name="carData" type="List" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    
+    <aura:iteration items="{!v.carData}" var="elem">
+        <lightning:combobox 
+                            name="currency" 
+                            label="Currency" 
+                            value="USD" 
+                            placeholder="Select Currency"
+                            onchange="{! c.handleCurChange }"
+                            />
+        
+        <lightning:card title="{!elem.Name}">
+            
+            <lightning:recordViewForm recordId="{!v.recordId}" objectApiName="Car__c">
+                <div class="slds-box">
+                    <lightning:outputField fieldName="Name" />
+                    <lightning:outputField fieldName="Model__c" />
+                    <lightning:outputField fieldName="Car_Price__c" value="{!elem.Car_Price__c}" />
+                </div>
+            </lightning:recordViewForm>
+            
+            <lightning:carousel disableAutoRefresh="false" disableAutoScroll="false">
+                <lightning:carouselImage src = "{!$Resource.f90}" />
+                <lightning:carouselImage src = "{!$Resource.f90+'B'}" />
+                <lightning:carouselImage src = "{!$Resource.f90+'I'}" />
+            </lightning:carousel>
+            
+        </lightning:card>
+        
+    </aura:iteration>
+    
+</aura:component>
