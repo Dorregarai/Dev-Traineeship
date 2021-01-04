@@ -1,0 +1,9 @@
+public class ImageCarouselControllerManager {
+    public static List<Car__c> getCars(Id recordId) {
+        List<Car__c> records = [ 
+            SELECT Name, Model__c, Car_Price__c
+            FROM Car__c WHERE Id = :recordId ];
+        
+        return records;
+    }
+}
