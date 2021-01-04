@@ -1,0 +1,23 @@
+({
+	doInit : function(component, event, helper) {
+		component.set('v.columns', [
+            { label: 'Case Number', fieldName: 'CaseNumber', type: 'text' },
+            { label: 'Case Origin', fieldName: 'Origin', type: 'text' },
+            { label: 'SuppliedEmail', fieldName: 'SuppliedEmail', type: 'text' },
+            { label: 'Status', fieldName: 'Status', type: 'text' },
+            { label: 'Reason', fieldName: 'Reason', type: 'text' },
+            { label: 'Owner', fieldName: 'OwnerId', type: 'text' },
+            { label: 'Action', type: 'button', typeAttributes: { label: 'Merge' } }
+        ]);
+        
+        helper.fetchCases(component);
+	},
+    
+    handleMergeClick: function(component, event, helper) {
+        helper.mergeButtonClick(component, event);
+    },
+    
+    handleClosePopUp: function(component, event, helper) {
+        helper.closePopUp(component, event);
+    }
+})
