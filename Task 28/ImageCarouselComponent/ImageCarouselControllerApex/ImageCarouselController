@@ -1,0 +1,6 @@
+public class ImageCarouselController {
+	@AuraEnabled
+    public static Car__c getCar(Id recordId) {
+        return ImageCarouselControllerManager.getCars(recordId)[0];
+    }
+}
