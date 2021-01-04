@@ -1,0 +1,15 @@
+@IsTest
+public class OpportunityCloseScheduledJobTest {
+	@isTest
+    static void test() {
+        String CRON_EXP = '0 0 23 4 1 ? 2021';
+        
+        System.schedule(
+            'OpportunityCloseScheduledJobTest', 
+            CRON_EXP, 
+            new OpportunityCloseScheduledJob());
+                
+        Integer actualJob = [ SELECT count() FROM CronTrigger WHERE CronJobDetail.Name = 'OpportunityCloseScheduledJobTest' ];
+        System.assertEquals(1, actualJob);
+    }
+}
