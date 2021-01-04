@@ -1,0 +1,31 @@
+<aura:component 
+                controller="DuplicateCasesController" 
+                implements="force:hasRecordId,flexipage:availableForAllPageTypes"
+                >
+    <aura:attribute name="data" type="Object" />
+    <aura:attribute name="columns" type="List" />
+    <aura:attribute name="isModalOpen" type="Boolean" default="false" />
+    <aura:attribute name="currentDuplRecord" type="Object" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler
+                  name="modalVarChange"
+                  event="c:ChangeIsModalOpenEvent"
+                  action="{!c.handleClosePopUp}"
+                  />
+    
+    <div>
+        <lightning:datatable 
+                             keyField="Id"
+                             data="{!v.data}"
+                             columns="{!v.columns}"
+                             hideCheckboxColumn="true"
+                             onrowaction="{!c.handleMergeClick}"
+                             />
+    </div>
+    
+    <aura:if isTrue="{!v.isModalOpen}">
+        <c:popUp />
+    </aura:if>
+    
+</aura:component>
