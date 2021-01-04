@@ -1,0 +1,33 @@
+public class NBRBIntegration {
+    public static void getCurrencyRate(String curName) {
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        
+        String endpoint = 'https://www.nbrb.by/api/exrates/rates/';
+        
+        switch on curName {
+            when 'RUB' { endpoint += '298'; }
+            when 'USD' { endpoint += '145'; }
+            when 'EUR' { endpoint += '292'; }
+        }
+        
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        
+        HttpResponse res = http.send(req);
+        
+        Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+        Decimal rate = (Decimal) results.get('Cur_OfficialRate');
+        
+		setCurrencyRate(curName, rate);
+    }
+    
+    public static void setCurrencyRate(String curName, Decimal rate) {
+        List<CurrencyRate__c> currenciesToUpdate = [ SELECT Id, Name, Rate_Value__c FROM CurrencyRate__c WHERE Name = :curName ];
+        
+        if(curName == 'RUB') { rate = rate / 100; }
+        
+        currenciesToUpdate[0].Rate_Value__c = rate;
+        update currenciesToUpdate;
+    }
+}
