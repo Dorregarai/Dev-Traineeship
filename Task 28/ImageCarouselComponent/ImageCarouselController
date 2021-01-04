@@ -1,0 +1,23 @@
+({
+	doInit : function(component, event, helper) {
+		let action = component.get('c.getCar');
+        
+        action.setParams({
+            recordId : component.get('v.recordId'),
+            currency: component.get('v.currency')
+        });
+        
+        action.setCallback(this, function(res) {
+            let state = res.getState();
+            if(state === 'SUCCESS') {
+                component.set('v.carData', res.getReturnValue());
+                console.log(component.get('v.currency'));
+            }
+        });
+        $A.enqueueAction(action);
+	},
+    
+    handleCurChange: function(component, event, helper) {
+        var selectedOptionValue = event.getParam('value');
+    }
+})
