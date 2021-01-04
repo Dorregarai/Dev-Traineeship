@@ -1,0 +1,128 @@
+@IsTest
+public class DuplicateCasesControllerTest {
+    @testSetup
+    public static void setup() {
+        List<Account> accToTest = new List<Account>();
+        
+        accToTest.add(new Account(Name = 'TestAcc'));
+        insert accToTest;
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Description = null,
+            Origin = 'Email',
+            Language__c = 'RU',
+            Reason = 'General Question',
+            Subject = 'Test',
+            Priority = 'Low'
+        ));
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Description = 'TestD',
+            Priority = 'High'
+        ));
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Reason = 'General Question',
+            Priority = 'Low'
+        ));
+        
+        insert casesToTest;
+    }
+    
+	@isTest
+    public static void test() {
+        List<Case> originalCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName
+            FROM Case 
+            WHERE Origin = 'Email' 
+            LIMIT 1
+        ];
+        Case originalCase = originalCases[0];
+        DuplicateCasesController.getCases(originalCase.Id);
+        System.assertEquals(1, originalCases.size());
+        
+        testSubject(originalCase);
+        testSuppliedMail(originalCase);
+        testReason(originalCase);
+    }
+    
+    public static void testSubject(Case originalCase) {
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE Subject = :originalCase.Subject 
+        ];
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+    }
+        
+    public static void testSuppliedMail(Case originalCase) {
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE SuppliedEmail = :originalCase.SuppliedEmail 
+        ];
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+    }
+        
+    public static void testReason(Case originalCase) {
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE Reason = :originalCase.Reason 
+        ];
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], true);
+    }
+}
