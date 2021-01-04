@@ -1,0 +1,34 @@
+@IsTest
+public class ITriggerHandlerTest {
+    public class ClassForTest implements ITriggerHandler {
+        public void beforeInsert(List<sObject> triggerNew) {}
+        public void afterInsert(List<sObject> triggerNew) {}
+        public void beforeUpdate(
+            List<sObject> triggerNew,
+            Map<Id, sObject> triggerNewMap,
+            List<sObject> triggerOld,
+            Map<Id, sObject> triggerOldMap
+        ) {}
+        public void afterUpdate(
+            List<sObject> triggerNew,
+            Map<Id, sObject> triggerNewMap,
+            List<sObject> triggerOld,
+            Map<Id, sObject> triggerOldMap
+        ) {}
+        public void beforeDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap) {}
+        public void afterDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap) {}
+        public void afterUndelete(List<sObject> triggerNew, Map<Id, sObject> triggerNewMap) {}
+    }
+    
+    @isTest
+    public static void test() {
+        ClassForTest test = new ClassForTest();
+        test.beforeInsert(Trigger.new);
+        test.afterInsert(Trigger.new);
+        test.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, trigger.oldMap);
+        test.afterUpdate(Trigger.new, Trigger.newMap, Trigger.old, trigger.oldMap);
+        test.beforeDelete(Trigger.old, trigger.oldMap);
+        test.afterDelete(Trigger.old, trigger.oldMap);
+        test.afterUndelete(Trigger.new, Trigger.newMap);
+    }
+}
