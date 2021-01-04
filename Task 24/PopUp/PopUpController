@@ -1,0 +1,15 @@
+({
+   closeModal: function(component, event, helper) {
+       component.getEvent('modalVarChange').setParams({
+           isModalOpen: false
+       }).fire();
+   },
+  
+   continueSubmit: function(component, event, helper) {
+       component.getEvent('modalVarChange').setParams({
+           isModalOpen: false,
+           isContinue: true,
+           isNotify: component.get('v.isNotify')
+       }).fire();
+   }
+})
