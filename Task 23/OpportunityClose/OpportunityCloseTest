@@ -1,0 +1,26 @@
+@IsTest
+public class OpportunityCloseTest {
+	@testSetup
+    static void setup() {
+        List<Opportunity> oppsToTest = new List<Opportunity>();
+        
+        for(Integer i = 0; i < 50; i++) {
+            oppsToTest.add(new Opportunity(
+                Name = 'Test ' + i,
+                CloseDate = Date.today() + 1,
+                StageName = 'Prospecting'
+            ));
+        }
+        insert oppsToTest;
+    }
+    
+    @isTest
+    static void test() {
+        Test.startTest();
+        OpportunityClose oppClose = new OpportunityClose();
+        Database.executeBatch(oppClose, 10);
+        Test.stopTest();
+        
+        System.assertEquals(50, [ SELECT count() FROM Opportunity WHERE StageName = 'Closed Lost' ]);
+    }
+}
