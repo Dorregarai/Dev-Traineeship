@@ -1,0 +1,54 @@
+public class Product2TriggerHandler implements ITriggerHandler {
+    public void beforeInsert(List<sObject> triggerNew) {}
+    public void afterInsert(List<sObject> triggerNew) {}
+    public void beforeUpdate(
+        List<sObject> triggerNew,
+        Map<Id, sObject> triggerNewMap,
+        List<sObject> triggerOld,
+        Map<Id, sObject> triggerOldMap
+    ) {}
+    
+    public void afterUpdate(
+        List<sObject> triggerNew,
+        Map<Id, sObject> triggerNewMap,
+        List<sObject> triggerOld,
+        Map<Id, sObject> triggerOldMap
+    ) {
+        List<Task> tasksToInsert = new List<Task>();
+        List<RecordType> recordTypes = [ SELECT Id, Name FROM RecordType WHERE Name = 'Call' ];
+        Product2 elemOld = (Product2)triggerOld[0];
+        Product2 elemNew = (Product2)triggerNew[0];
+        
+        List<OpportunityLineItem> oppProds = [ SELECT Name, OpportunityId FROM OpportunityLineItem WHERE Product2Id = :elemOld.Id ];
+        List<Id> oppIds = new List<Id>();
+        
+        for(OpportunityLineItem elem : oppProds) {
+            oppIds.add(elem.OpportunityId);
+        }
+        
+        List<Opportunity> opps = [ SELECT Id, Name FROM Opportunity WHERE Id IN :oppIds ];
+        
+        for(Opportunity elem : opps) {
+            if(elemOld.IsActive == true && elemNew.IsActive == false) {
+                Task taskToInsert = new Task(
+                    RecordTypeId = recordTypes[0].Id,
+                    Subject = 'Old model deal!!!',
+                    Status = 'New',
+                    Auto_Created__c = true,
+                    ActivityDate = Date.today().addMonths(1),
+                    //Phone__c = elem.Account__r.Phone,
+                    Priority = 'High',
+                    WhatId = elem.Id
+                );
+                tasksToInsert.add(taskToInsert);
+            }
+        }
+        
+                System.debug(tasksToInsert);
+    	insert tasksToInsert;
+    }
+    
+    public void beforeDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap) {}
+    public void afterDelete(List<sObject> triggerOld, Map<Id, sObject> triggerOldMap) {}
+    public void afterUndelete(List<sObject> triggerNew, Map<Id, sObject> triggerNewMap) {}
+}
