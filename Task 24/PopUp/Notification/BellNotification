@@ -1,0 +1,50 @@
+public class BellNotification {
+    public static void sendNotification(String message, Id caseOwnerId) {
+        System.debug(caseOwnerId);
+        Http http = new Http();
+        HttpRequest req = new HttpRequest();
+        
+        req.setEndpoint(
+            Url.getOrgDomainUrl().toExternalForm() + 
+            '/services/data/v46.0/actions/standard/customNotificationAction'
+        );
+        req.setMethod('POST');
+        req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+        req.setHeader('Content-Type', 'application/json');
+        
+        List<sObject> notifications = [ 
+            SELECT Id 
+            FROM CustomNotificationType 
+            WHERE DeveloperName  = 'Close_case_via_merging' 
+        ];
+        
+        CustomNotificationActionInput input = new CustomNotificationActionInput();
+        
+        input.customNotifTypeId = notifications[0].Id;
+        input.recipientIds = new List<Id>{caseOwnerId};
+        input.title = 'Warning';
+        input.body = message;
+        input.targetId = notifications[0].Id;
+        
+        CustomNotificationAction action = new CustomNotificationAction();
+        action.inputs = new List<CustomNotificationActionInput>{input};
+        
+        req.setBody(JSON.serialize(action));
+        
+        HttpResponse res = http.send(req);
+        
+        System.debug(res.getBody());
+    }
+    
+    public class CustomNotificationAction {
+        public List<CustomNotificationActionInput> inputs { get; set; }
+    }
+    
+    public class CustomNotificationActionInput {
+        public String customNotifTypeId { get; set; }
+        public List<Id> recipientIds { get; set; }
+        public String title { get; set; }
+        public String body { get; set; }
+        public String targetId { get; set; }
+    }
+}
