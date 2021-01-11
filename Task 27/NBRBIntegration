@@ -1,5 +1,5 @@
 public class NBRBIntegration {
-    public static void getCurrencyRate(String curName) {
+    public static HttpResponse getCurrencyRate(String curName) {
         Http http = new Http();
         HttpRequest req = new HttpRequest();
         
@@ -20,10 +20,15 @@ public class NBRBIntegration {
         Decimal rate = (Decimal) results.get('Cur_OfficialRate');
         
 		setCurrencyRate(curName, rate);
+        
+        return res;
     }
     
     public static void setCurrencyRate(String curName, Decimal rate) {
-        List<CurrencyRate__c> currenciesToUpdate = [ SELECT Id, Name, Rate_Value__c FROM CurrencyRate__c WHERE Name = :curName ];
+        List<CurrencyRate__c> currenciesToUpdate = [ 
+            SELECT Id, Name, Rate_Value__c 
+            FROM CurrencyRate__c WHERE Name = :curName 
+        ];
         
         if(curName == 'RUB') { rate = rate / 100; }
         
