@@ -1,0 +1,13 @@
+public class CarDetails_Manager {
+    public static List<Product2> getProducts(Id productId) {
+        List<Product2> products = [ 
+            SELECT Name, Model__c, ProductCode, Price__c, Year__c, Description 
+            FROM Product2 
+            WHERE Id = :productId 
+        ];
+        
+        System.debug(products);
+        
+        return products;
+    }
+}
