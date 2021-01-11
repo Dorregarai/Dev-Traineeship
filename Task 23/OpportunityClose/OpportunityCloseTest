@@ -18,7 +18,7 @@ public class OpportunityCloseTest {
     static void test() {
         Test.startTest();
         OpportunityClose oppClose = new OpportunityClose();
-        Database.executeBatch(oppClose, 10);
+        Database.executeBatch(oppClose);
         Test.stopTest();
         
         System.assertEquals(50, [ SELECT count() FROM Opportunity WHERE StageName = 'Closed Lost' ]);
