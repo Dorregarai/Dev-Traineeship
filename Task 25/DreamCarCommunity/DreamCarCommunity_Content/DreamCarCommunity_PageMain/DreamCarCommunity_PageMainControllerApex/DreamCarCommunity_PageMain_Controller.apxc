@@ -1,0 +1,6 @@
+public class DreamCarCommunity_PageMain_Controller {
+    @AuraEnabled(cacheable=true)
+    public static List<Product2> getProducts(Integer price, String name, String currencyCode) {
+        return DreamCarCommunity_PageMain_Manager.getProducts(price, name, currencyCode);
+    }
+}
