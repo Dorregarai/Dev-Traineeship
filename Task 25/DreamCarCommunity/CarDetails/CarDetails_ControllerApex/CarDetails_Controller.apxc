@@ -1,0 +1,6 @@
+public class CarDetails_Controller {
+	@AuraEnabled(cacheable=true)
+    public static Product2 getProduct(Id productId) {
+        return CarDetails_Manager.getProducts(productId)[0];
+    }
+}
