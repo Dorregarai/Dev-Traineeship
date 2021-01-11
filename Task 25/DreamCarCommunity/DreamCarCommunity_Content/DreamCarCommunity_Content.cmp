@@ -1,0 +1,11 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes">
+    <lightning:layout>
+        <lightning:layoutItem size="12">
+            <lightning:layout>
+                <c:DreamCarCommunity_PageMain />
+                <c:DreamCarCommunity_PageRight />
+            </lightning:layout>
+        </lightning:layoutItem>
+    </lightning:layout>
+    
+</aura:component>
