@@ -11,10 +11,10 @@ public class DuplicateCasesController {
     public static void mergeCases(Id originalCaseId, Case duplicateCase, Boolean isNotify) {
         Case originalCase = DuplicateCasesControllerManager.getOriginalCase(originalCaseId)[0];
         
-        if(originalCase.Description == null){
-            originalCase.Description = duplicateCase.Description;
-        } else {
+        if(originalCase.Description != null){
             originalCase.Description += ' ----//---- ' + duplicateCase.Description;
+        } else {
+            originalCase.Description = duplicateCase.Description;
         }
             
         if(duplicateCase.AccountId != null && originalCase.AccountId == null) {
@@ -48,9 +48,9 @@ public class DuplicateCasesController {
             emailMessagesToUpdate.add(elem);
         }
         
-        if(duplicateCase.ParentId == null) {
+        /*if(duplicateCase.ParentId == null) {
             duplicateCase.ParentId = originalCase.Id;
-        }
+        }*/
         duplicateCase.Status = 'Closed (Resolved)';
         
         update originalCase;
