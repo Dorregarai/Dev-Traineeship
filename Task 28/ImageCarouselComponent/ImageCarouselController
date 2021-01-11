@@ -3,21 +3,17 @@
 		let action = component.get('c.getCar');
         
         action.setParams({
-            recordId : component.get('v.recordId'),
-            currency: component.get('v.currency')
-        });
+            carId: component.get('v.recordId')
+        })
         
         action.setCallback(this, function(res) {
             let state = res.getState();
             if(state === 'SUCCESS') {
                 component.set('v.carData', res.getReturnValue());
-                console.log(component.get('v.currency'));
+                console.log(component.get('v.carData'));
+                console.log(component.get('v.recordId'));
             }
         });
         $A.enqueueAction(action);
-	},
-    
-    handleCurChange: function(component, event, helper) {
-        var selectedOptionValue = event.getParam('value');
-    }
+	}
 })
