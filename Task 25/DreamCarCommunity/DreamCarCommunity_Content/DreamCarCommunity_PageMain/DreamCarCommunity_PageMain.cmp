@@ -1,0 +1,104 @@
+<aura:component 
+                implements="forceCommunity:availableForAllPageTypes" 
+                controller="DreamCarCommunity_PageMain_Controller"
+                >
+    <aura:attribute name="sliderValue" type="Integer" default="1000" />
+    <aura:attribute name="searchValue" type="String" default="" />
+    <aura:attribute name="data" type="List" />
+    <aura:attribute name="currencyCode" type="String" default="USD" />
+    <aura:attribute name="isModalOpen" type="Boolean" default="false" />
+    <aura:attribute name="cardId" type="String" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:handler name="modalVarChange"
+                  event="c:CarDetailsEvent"
+                  action="{!c.handleCloseCarDetail}"
+                  />
+    
+    <lightning:layoutItem size="9">
+        
+        <lightning:layout>
+            <lightning:layoutItem size="3">
+                <lightning:select
+                                  aura:id="selectCurrency"
+                                  name="select"
+                                  label="Select a currency"
+                                  onchange="{! c.handleSelectChange }"
+                                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="RUB">RUB</option>
+                    <option value="BYN">BYN</option>
+                </lightning:select>
+            </lightning:layoutItem>
+        </lightning:layout>
+        
+        <div class="page-section page-main">
+            <lightning:layout>
+                
+                <lightning:layoutItem size="3">
+                    <lightning:slider 
+                                      label="Price" 
+                                      value="{!v.sliderValue}" 
+                                      min="1000" 
+                                      max="1000000"
+                                      size="small"
+                                      onchange="{!c.handleSliderChange}"
+                                      />
+                </lightning:layoutItem>
+                
+                <lightning:layoutItem alignmentBump="left">
+                    <lightning:input 
+                                     type="search" 
+                                     aura:id="car-search" 
+                                     value="{!v.searchValue}"
+                                     size="3" 
+                                     onchange="{!c.handleSearchChange}" 
+                                     />
+                </lightning:layoutItem>
+                
+            </lightning:layout>
+            
+            <lightning:layout multipleRows="true">
+                
+                <aura:iteration items="{!v.data}" var="elem">
+                    <lightning:layoutItem size="4" padding="around-small">
+                        <div
+                             class="page-main_card__Block slds-text-body_regular"
+                             data-id="{!elem.Id}"
+                             onclick="{!c.handleCardClick}"
+                             >
+                            <img 
+                                 src="{!'/sfsites/c/resource/1609675258000/' + elem.ProductCode}" 
+                                 class="page-main_card__Img" 
+                                 />
+                            
+                            <label class="slds-form-element__label" for="name">Mark</label>
+                            <lightning:formattedText id="name" value="{!elem.Name}" />
+                            
+                            <label class="slds-form-element__label" for="name">Model</label>
+                            <lightning:formattedText id="model" value="{!elem.Model__c}" />
+                            
+                            <label class="slds-form-element__label" for="year">Price</label>
+                            <lightning:formattedNumber 
+                                                       id="price"
+                                                       value="{!elem.Price__c}" 
+                                                       style="currency" 
+                                                       currencyCode="{!v.currencyCode}"
+                                                       />
+                            
+                            <label class="slds-form-element__label" for="year">Year</label>
+                            <lightning:formattedDateTime id="year" value="{!elem.Year__c}" year="numeric"/>
+                            
+                        </div>
+                    </lightning:layoutItem>
+                </aura:iteration>
+                
+                <aura:if isTrue="{!v.isModalOpen}">
+                    <c:CarDetails cardId="{!v.cardId}" />
+                </aura:if>
+                
+            </lightning:layout>
+        </div>
+    </lightning:layoutItem>
+</aura:component>
