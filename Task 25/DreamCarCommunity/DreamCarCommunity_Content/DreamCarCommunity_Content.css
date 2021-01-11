@@ -1,0 +1,19 @@
+.THIS .page-section {
+    padding: 1rem;
+}
+
+.THIS .page-main {
+}
+
+.THIS .page-right {
+    border-left: dotted 2px #ccc;
+}
+
+.THIS .page-right_intro {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.THIS .page-right_content {
+    margin-top: 1rem;
+}
