@@ -1,7 +1,183 @@
 @IsTest
 public class DuplicateCasesControllerTest {
-    @testSetup
-    public static void setup() {
+    public static Case subjectTestSetup() {
+        List<Account> accToTest = new List<Account>();
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void getCases_test() {
+        Case originalCase = subjectTestSetup();
+        
+        System.assertEquals(1, DuplicateCasesController.getCases(originalCase.Id).size());
+    }
+    
+    @isTest
+    public static void mergeCases_test_Subject() {
+        Case originalCase = subjectTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+    }
+    
+    
+    public static Case descriptionNULLTestSetup() {
+        List<Account> accToTest = new List<Account>();
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Description = null,
+            Language__c = 'RU',
+            Subject = 'Test'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Description = 'TestDescription',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Description_1() {
+        Case originalCase = descriptionNULLTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertEquals('TestDescription', [ SELECT Description FROM Case WHERE Id = :originalCase.Id ][0].Description);
+    }
+    
+    
+    public static Case descriptionTestSetup() {
+        List<Account> accToTest = new List<Account>();
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Description = 'TestDescription',
+            Language__c = 'RU',
+            Subject = 'Test'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Description = 'TestDescription',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Description_2() {
+        Case originalCase = descriptionTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.debug(duplicateCases);
+        
+        System.assertEquals(
+            'TestDescription ----//---- TestDescription', 
+            [ SELECT Description FROM Case WHERE Id = :originalCase.Id ][0].Description
+        );
+    }
+        
+    
+    public static Case accountNULLTestSetup() {
         List<Account> accToTest = new List<Account>();
         
         accToTest.add(new Account(Name = 'TestAcc'));
@@ -11,13 +187,72 @@ public class DuplicateCasesControllerTest {
         
         casesToTest.add(new Case(
         	Status = 'New',
-            Description = null,
             Origin = 'Email',
             Language__c = 'RU',
-            Reason = 'General Question',
             Subject = 'Test',
-            Priority = 'Low'
+            AccountId = accToTest[0].Id = null
         ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium',
+            AccountId = accToTest[0].Id
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Account_1() {
+        Case originalCase = accountNULLTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertEquals(duplicateCases[0].AccountId, [ SELECT AccountId FROM Case WHERE Id = :originalCase.Id ][0].AccountId);
+    }
+    
+    
+    public static Case accountTestSetup() {
+        List<Account> accToTest = new List<Account>();
+        
+        accToTest.add(new Account(Name = 'TestAcc'));
+        insert accToTest;
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test',
+            AccountId = accToTest[0].Id
+        ));
+        
         casesToTest.add(new Case(
             Status = 'On Hold',
             Origin = 'Manual',
@@ -25,27 +260,80 @@ public class DuplicateCasesControllerTest {
             Subject = 'Test',
             Priority = 'Medium'
         ));
-        casesToTest.add(new Case(
-            Status = 'On Hold',
-            Origin = 'Manual',
-            Language__c = 'EN',
-            Description = 'TestD',
-            Priority = 'High'
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Account_2() {
+        Case originalCase = accountTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertNotEquals(null, [ SELECT AccountId FROM Case WHERE Id = :originalCase.Id ][0].AccountId);
+    }
+    
+    
+    public static Case leadNULLTestSetup() {
+        List<Lead> leadToTest = new List<Lead>();
+        
+        leadToTest.add(new Lead(
+            LastName = 'TestLead',
+            Company = 'TestCompany',
+            Language__c = 'RU'
         ));
+        insert leadToTest;
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test'
+        ));
+        
         casesToTest.add(new Case(
             Status = 'On Hold',
             Origin = 'Manual',
             Language__c = 'EN',
-            Reason = 'General Question',
-            Priority = 'Low'
+            Subject = 'Test',
+            Priority = 'Medium',
+            Lead__c = leadToTest[0].Id
         ));
         
         insert casesToTest;
+        
+        return casesToTest[0];
     }
     
-	@isTest
-    public static void test() {
-        List<Case> originalCases = [ 
+    @isTest
+    public static void mergeCases_test_Lead_1() {
+        Case originalCase = leadNULLTestSetup();
+        
+        List<Case> duplicateCases = [ 
             SELECT 
             	Subject, 
             	SuppliedEmail, 
@@ -55,21 +343,59 @@ public class DuplicateCasesControllerTest {
             	AccountId, 
             	Lead__c, 
             	Country__c, 
-            	SuppliedName
+            	SuppliedName,
+            	ParentId
             FROM Case 
-            WHERE Origin = 'Email' 
-            LIMIT 1
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
         ];
-        Case originalCase = originalCases[0];
-        DuplicateCasesController.getCases(originalCase.Id);
-        System.assertEquals(1, originalCases.size());
         
-        testSubject(originalCase);
-        testSuppliedMail(originalCase);
-        testReason(originalCase);
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertNotEquals(null, [ SELECT Lead__c FROM Case WHERE Id = :originalCase.Id ][0].Lead__c);
     }
     
-    public static void testSubject(Case originalCase) {
+    
+    public static Case leadTestSetup() {
+        List<Lead> leadToTest = new List<Lead>();
+        
+        leadToTest.add(new Lead(
+            LastName = 'TestLead',
+            Company = 'TestCompany',
+            Language__c = 'RU'
+        ));
+        insert leadToTest;
+        
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test',
+            Lead__c = leadToTest[0].Id
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Lead_2() {
+        Case originalCase = leadTestSetup();
+        
         List<Case> duplicateCases = [ 
             SELECT 
             	Subject, 
@@ -83,12 +409,104 @@ public class DuplicateCasesControllerTest {
             	SuppliedName,
             	ParentId
             FROM Case 
-            WHERE Subject = :originalCase.Subject 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
+        ];
+        
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertNotEquals(null, [ SELECT Lead__c FROM Case WHERE Id = :originalCase.Id ][0].Lead__c);
+    }
+    
+    
+    public static Case priorityLOWTestSetup() {
+        List<Account> accToTest = new List<Account>();
+
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test',
+            Priority = 'Low'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Priority_1() {
+        Case originalCase = priorityLOWTestSetup();
+        
+        List<Case> duplicateCases = [ 
+            SELECT 
+            	Subject, 
+            	SuppliedEmail, 
+            	Reason, 
+            	Description, 
+            	Priority, 
+            	AccountId, 
+            	Lead__c, 
+            	Country__c, 
+            	SuppliedName,
+            	ParentId
+            FROM Case 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
         ];
         DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
-    }
         
-    public static void testSuppliedMail(Case originalCase) {
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertEquals(duplicateCases[0].Priority, [ SELECT Priority FROM Case WHERE Id = :originalCase.Id ][0].Priority);
+    }
+    
+    
+    public static Case priorityMEDIUMTestSetup() {
+        List<Account> accToTest = new List<Account>();
+
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'High'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Priority_2() {
+        Case originalCase = priorityMEDIUMTestSetup();
+        
         List<Case> duplicateCases = [ 
             SELECT 
             	Subject, 
@@ -102,12 +520,48 @@ public class DuplicateCasesControllerTest {
             	SuppliedName,
             	ParentId
             FROM Case 
-            WHERE SuppliedEmail = :originalCase.SuppliedEmail 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
         ];
         DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
-    }
         
-    public static void testReason(Case originalCase) {
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertEquals(duplicateCases[0].Priority, [ SELECT Priority FROM Case WHERE Id = :originalCase.Id ][0].Priority);
+    }
+    
+    
+    public static Case priorityHIGHTestSetup() {
+        List<Account> accToTest = new List<Account>();
+
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Email',
+            Language__c = 'RU',
+            Subject = 'Test',
+            Priority = 'High'
+        ));
+        
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Subject = 'Test',
+            Priority = 'Medium'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+    @isTest
+    public static void mergeCases_test_Priority_3() {
+        Case originalCase = priorityHIGHTestSetup();
+        
         List<Case> duplicateCases = [ 
             SELECT 
             	Subject, 
@@ -121,8 +575,14 @@ public class DuplicateCasesControllerTest {
             	SuppliedName,
             	ParentId
             FROM Case 
-            WHERE Reason = :originalCase.Reason 
+            WHERE 
+            	Subject = :originalCase.Subject AND
+            	Id != :originalCase.Id
         ];
-        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], true);
+        DuplicateCasesController.mergeCases(originalCase.Id, duplicateCases[0], false);
+        
+        System.assertEquals(1, [ SELECT count() FROM Case WHERE Status = 'Closed (Resolved)' ]);
+        
+        System.assertEquals('High', [ SELECT Priority FROM Case WHERE Id = :originalCase.Id ][0].Priority);
     }
 }
