@@ -1,6 +1,12 @@
 public class ImageCarouselController {
 	@AuraEnabled
-    public static List<ContentDocumentLink> getCar(Id carId) {
-        return ImageCarouselControllerManager.getCars(carId);
+    public static Map<String, List<SObject>> getCar(Id carId) {
+        try {
+            if(carId == null) { throw new DMLException('No request data'); }
+            
+            return ImageCarouselControllerManager.getCars(carId);
+        } catch(Exception e) {
+            return null;
+        }
     }
 }
