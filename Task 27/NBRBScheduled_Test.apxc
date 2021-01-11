@@ -1,0 +1,40 @@
+@IsTest
+public class NBRBScheduled_Test {
+    static {
+        List<CurrencyRate__c> crate = new List<CurrencyRate__c>();
+        
+        crate.add(new CurrencyRate__c(
+            Name = 'RUB'
+        ));
+        insert crate;
+    }
+    
+	@isTest
+    static void execute_Test_1() {
+        String CRON_EXP = '0 0 23 11 1 ? 2021';
+        
+        Map<String, String> header = new Map<String, String>();
+        header.put('Content-Type', 'application/json');
+            
+        Test.setMock(
+            HttpCalloutMock.class, 
+            new SingleCalloutMock(
+                200, 
+                'Complete', 
+                '{"Cur_ID": 298, "Cur_OfficialRate": 1.1}', 
+                header
+            )
+        );
+        
+        Test.startTest();
+        HttpResponse response = NBRBIntegration.getCurrencyRate('RUB');
+        System.schedule(
+            'GetCurrencyFromNBRBScheduledJobTest', 
+            CRON_EXP, 
+            new NBRBScheduled());
+        Test.stopTest();
+                
+        Integer actualJob = [ SELECT count() FROM CronTrigger WHERE CronJobDetail.Name = 'GetCurrencyFromNBRBScheduledJobTest' ];
+        System.assertEquals(1, actualJob);
+    }
+}
