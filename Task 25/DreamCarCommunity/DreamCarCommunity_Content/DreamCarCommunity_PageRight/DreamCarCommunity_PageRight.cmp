@@ -1,0 +1,50 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes">
+    <lightning:layoutItem size="3">
+        <div class="page-section page-right">
+            <p class="page-right_intro">Связаться с нами</p>
+                
+            <form action="https://webto.salesforce.com/servlet/servlet.WebToCase?encoding=UTF-8" method="POST">
+                
+                <input type="hidden" name="orgid" value="00D2w000008o9km"/>
+                <input type="hidden" name="retURL" value="https://google.com"/>
+                
+                <label class="slds-form-element__label" for="email">
+                    <abbr class="slds-required" title="required">* </abbr>
+                    Email
+                </label>
+                <input 
+                       class="slds-input"
+                       id="email"
+                       maxlength="80"
+                       name="email"
+                       size="20"
+                       type="email"
+                       required="true"
+                       />
+                
+                <label class="slds-form-element__label" for="reason">
+                    <abbr class="slds-required" title="required">* </abbr>
+                    Категория
+                </label>
+                <select id="reason" name="reason" required="true" class="slds-select">
+                    <option value="">Общие вопросы</option>
+                    <option value="Financial Claim">Financial Claim</option>
+                    <option value="General Question">General Question</option>
+                    <option value="Insurance">Insurance</option>
+                </select>
+                
+                <label class="slds-form-element__label" for="description">
+                    <abbr class="slds-required" title="required">* </abbr>
+                    Описание обращения
+                </label>
+                <textarea name="description" required="true" class="slds-textarea"></textarea>
+                
+                <input type="hidden" id="external" name="external" value="1" />
+                
+                <input type="submit" name="Отправить" class="slds-button slds-button_brand"/>
+                
+            </form>
+
+        </div>
+    </lightning:layoutItem>
+</aura:component>
