@@ -1,1 +1,78 @@
-
+@IsTest
+public class SetupTest {
+    public static void insertCustomSettingTrigger() {
+        List<TriggerSetting__c> cs = new List<TriggerSetting__c>();
+        cs.add(new TriggerSetting__c(Name = 'Product2Trigger', Is_Active__c = true));
+        insert cs;
+    }
+    
+    public static void insertAccount() {
+        List<Account> acc = new List<Account>();
+        acc.add(new Account( Name = 'testAcc', Phone = '123' ));
+        insert acc;
+    }
+    
+    public static List<Opportunity> insertOpportunity() {
+        List<Opportunity> oppsToTest = new List<Opportunity>();
+        
+        oppsToTest.add(new Opportunity(
+            Name = 'test',
+            CloseDate = Date.today() + 1,
+            StageName = 'Prospecting'
+        ));
+        insert oppsToTest;
+        
+        return oppsToTest;
+    }
+    
+    public static List<Product2> insertProduct2() {
+        List<Product2> prodsToTest = new List<Product2>();
+        
+        prodsToTest.add(new Product2(
+            Name = 'TestProd',
+            ProductCode = 'T-ProdD',
+            IsActive = true
+        ));
+        insert prodsToTest;
+        
+        return prodsToTest;
+    }
+    
+    public static List<PricebookEntry> insertPricebookEntry() {
+        List<PricebookEntry> pbsToTest = new List<PricebookEntry>();
+        List<Product2> prodsToTest = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        
+        pbsToTest.add(new PricebookEntry(
+            Pricebook2Id = Test.getStandardPricebookId(),
+            Product2Id = prodsToTest[0].Id,
+            UnitPrice = 100,
+            IsActive = true
+        ));
+        insert pbsToTest;
+        
+        return pbsToTest;
+    }
+    
+    public static List<OpportunityLineItem> insertOpportunityLineItem() {
+        List<OpportunityLineItem> olisToTest = new List<OpportunityLineItem>();
+        List<Opportunity> oppsToTest = [ SELECT Id FROM Opportunity WHERE Name = 'test' ];
+        List<PricebookEntry> pbsToTest = [ 
+            SELECT Id, UnitPrice 
+            FROM PricebookEntry 
+            WHERE Pricebook2Id = :Test.getStandardPricebookId() 
+        ];
+        
+        OpportunityLineItem oli = new OpportunityLineItem();
+        
+        for(Opportunity elem : oppsToTest) {
+            oli.OpportunityId = elem.Id;
+            oli.Quantity = 5;
+            oli.PricebookEntryId = pbsToTest[0].Id;
+            oli.TotalPrice = oli.Quantity * pbsToTest[0].UnitPrice;
+        }
+        olisToTest.add(oli);
+        insert olisToTest;
+        
+        return olisToTest;
+    }
+}
