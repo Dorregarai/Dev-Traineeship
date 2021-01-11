@@ -9,9 +9,9 @@
         action.setCallback(this, function(res) {
             let state = res.getState();
             if(state === 'SUCCESS') {
-                component.set('v.carData', res.getReturnValue());
-                console.log(component.get('v.carData'));
-                console.log(component.get('v.recordId'));
+                component.set('v.carData', res.getReturnValue().car[0]);
+                component.set('v.carAttachments', res.getReturnValue().carAttachment);
+                console.log(component.get('v.carData.Name'));
             }
         });
         $A.enqueueAction(action);
