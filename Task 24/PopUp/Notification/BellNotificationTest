@@ -15,8 +15,24 @@ public class BellNotificationTest {
     
 	@isTest
     public static void test() {
+        Map<String, String> header = new Map<String, String>();
+        header.put('Content-Type', 'application/json');
+        header.put('Authorization', 'Bearer ' + UserInfo.getSessionId());
+        
+        Test.setMock(
+            HttpCalloutMock.class, 
+            new SingleCalloutMock(
+                200, 
+                'Complete', 
+                'body', 
+                header
+            )
+        );
+        
         List<Case> casesToTest = [ SELECT Id, OwnerId FROM Case ];
         
+        Test.startTest();
         BellNotification.sendNotification('Test message', casesToTest[0].OwnerId);
+        Test.stopTest();
     }
 }
