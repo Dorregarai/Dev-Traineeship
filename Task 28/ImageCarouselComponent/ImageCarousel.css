@@ -1,0 +1,9 @@
+.THIS .page-main_carouselBlock {
+    display: flex;
+    flex-direction: row;
+}
+
+.THIS .page-main_carouselBlock__info {
+    display: flex;
+    flex-direction: column;
+}
