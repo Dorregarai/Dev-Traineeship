@@ -1,0 +1,35 @@
+  public class ImageCarouselControllerManager {
+    public static Map<String, List<SObject>> getCars(Id carId) {
+        try {
+            if(carId == null) { throw new DMLException('No request data'); }
+            
+            Map<String, List<SObject>> response = new Map<String, List<SObject>>();
+            
+            List<Car__c> records = [ 
+                SELECT
+                Name,
+                Model__c,
+                Car_Price__c,
+                ( SELECT ContentDocumentId FROM ContentDocumentLinks )
+                FROM Car__c
+                WHERE Id = :carId
+            ];
+            
+            List<Id> contentDocumentIds = new List<Id>();
+            
+            for(ContentDocumentLink elem : records[0].ContentDocumentLinks) {
+                contentDocumentIds.add(elem.ContentDocumentId);
+            }
+            
+            List<ContentVersion> carAttachment = [ SELECT Id FROM ContentVersion WHERE ContentDocumentId IN :contentDocumentIds ];
+            
+            response.put('car', records);
+            response.put('carAttachment', carAttachment);
+            
+            return response;
+        } catch(Exception e) {
+            return null;
+        }
+        
+    }
+}
