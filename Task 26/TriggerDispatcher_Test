@@ -1,0 +1,12 @@
+@IsTest
+public class TriggerDispatcher_Test {
+    @testSetup
+    public static void setup() {
+        SetupTest.insertCustomSettingTrigger();
+    }
+    
+    @isTest
+    static void run_Test_1() {
+        TriggerDispatcher.run(new Product2TriggerHandler(), 'Product2Trigger');
+    }
+}
