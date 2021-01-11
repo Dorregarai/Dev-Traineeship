@@ -1,38 +1,260 @@
 @IsTest
 public class DuplicateCasesControllerManagerTest {
-    @testSetup
-    public static void setup() {
+    public static Id testOrigSetup() {
         List<Case> casesToTest = new List<Case>();
         
         casesToTest.add(new Case(
         	Status = 'New',
-            Description = 'TestD',
             Origin = 'Manual',
             Language__c = 'RU',
-            Reason = 'General Question',
-            Subject = 'Test',
-            SuppliedEmail = 'test@test.com'
+            Subject = 'Test'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0].Id;
+    }
+    
+    @isTest
+    public static void getOriginalCase_test_1() {
+        Id caseId = testOrigSetup();
+        
+        System.assertEquals(1, DuplicateCasesControllerManager.getOriginalCase(caseId).size());
+    }
+    
+    @isTest
+    public static void getOriginalCase_test_2() {
+        System.assertEquals(0, DuplicateCasesControllerManager.getOriginalCase(null).size());
+    }
+    
+    
+    public static Case testSubjectSetup() {
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU',
+            Subject = 'Test'
         ));
         casesToTest.add(new Case(
             Status = 'On Hold',
             Origin = 'Manual',
             Language__c = 'EN',
-            Subject = 'Test',
-            Reason = 'General Question',
-            Priority = 'Medium',
-            SuppliedEmail = 'test@test.com'
+            Subject = 'Test'
         ));
         
         insert casesToTest;
+        
+        return casesToTest[0];
     }
     
 	@isTest
-    public static void test() {
-        List<Case> orCases = [ SELECT Id FROM Case WHERE Language__c = 'RU' ];
+    public static void getDuplicateCaseList_test_1() {
+        Case originalCase = testSubjectSetup();
         
-        Case orCase = DuplicateCasesControllerManager.getOriginalCase(orCases[0].Id)[0];
-        List<Case> dupCases = DuplicateCasesControllerManager.getDuplicateCaseList(orCase);
-        List<EmailMessage> emMessage = DuplicateCasesControllerManager.getEmailMessage(dupCases[0]);
-        DuplicateCasesControllerManager.notificationMessageSet(dupCases[0]);
+        System.assertEquals(1, DuplicateCasesControllerManager.getDuplicateCaseList(originalCase).size());
+    }
+    
+    
+    public static Case testSuppliedEmailSetup() {
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU',
+            SuppliedEmail = 'test@test.test'
+        ));
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            SuppliedEmail = 'test@test.test'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+	@isTest
+    public static void getDuplicateCaseList_test_2() {
+        Case originalCase = testSuppliedEmailSetup();
+        
+        System.assertEquals(1, DuplicateCasesControllerManager.getDuplicateCaseList(originalCase).size());
+    }
+    
+    
+    public static Case testReasonSetup() {
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU',
+            Reason = 'General Question'
+        ));
+        casesToTest.add(new Case(
+            Status = 'On Hold',
+            Origin = 'Manual',
+            Language__c = 'EN',
+            Reason = 'General Question'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+	@isTest
+    public static void getDuplicateCaseList_test_3() {
+        Case originalCase = testReasonSetup();
+        
+        System.assertEquals(1, DuplicateCasesControllerManager.getDuplicateCaseList(originalCase).size());
+    }
+    
+    
+    public static Case testFailSetup() {
+        List<Case> casesToTest = new List<Case>();
+        
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU',
+            Reason = 'General Question'
+        ));
+        
+        insert casesToTest;
+        
+        return casesToTest[0];
+    }
+    
+	@isTest
+    public static void getDuplicateCaseList_test_4() {
+        Case originalCase = testFailSetup();
+        
+        System.assertEquals(0, DuplicateCasesControllerManager.getDuplicateCaseList(originalCase).size());
+    }
+    
+
+    public static Case testEmailMessageSetup() {
+        List<Case> casesToTest = new List<Case>();
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU'
+        ));
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU'
+        ));
+        insert casesToTest;
+        
+        List<EmailMessage> testEmail = new List<EmailMessage>();
+        testEmail.add(new EmailMessage(
+            FromAddress = 'test@test.test',
+            Subject = 'test mail',
+            TextBody = 'test body',
+            ParentId = casesToTest[1].Id
+        ));
+        insert testEmail;
+        
+		return casesToTest[1];
+    }
+    
+    @isTest
+    public static void getgetEmailMessage_test_1() {
+        Case duplicateCase = testEmailMessageSetup();
+        
+        System.assertEquals(1, DuplicateCasesControllerManager.getEmailMessage(duplicateCase).size());
+    }
+    
+    @isTest
+    public static void getgetEmailMessage_test_2() {
+        Case duplicateCase = testEmailMessageSetup();
+        
+        System.assertEquals(0, DuplicateCasesControllerManager.getEmailMessage(new Case()).size());
+    }
+
+    @testSetup
+    static void usersSetup() {
+        Profile prof = [ SELECT Id FROM Profile WHERE Name='System Administrator' ];
+        
+        List<User> users = new List<User>();
+        users.add(new User(
+            LastName = 'TestUserForTest',
+            Email = 'TestUserForTest@test.com',
+            Alias = 'Tcode',
+            Username = 'TestUserForTest1@test.com',
+            CommunityNickname = 'TestUserForTest1',
+            LocaleSidKey = 'en_US',
+            TimeZoneSidKey = 'GMT',
+            LanguageLocaleKey = 'en_US',
+            ProfileID = prof.Id,
+            EmailEncodingKey = 'UTF-8',
+            IsActive = true
+        ));
+        users.add(new User(
+            LastName = 'TestUserForTest1',
+            Email = 'TestUserForTest1@test.com',
+            Alias = 'Tcode1',
+            Username = 'TestUserForTest11@test.com',
+            CommunityNickname = 'TestUserForTest11',
+            LocaleSidKey = 'ru',
+            TimeZoneSidKey = 'GMT',
+            LanguageLocaleKey = 'ru',
+            ProfileID = prof.Id,
+            EmailEncodingKey = 'UTF-8',
+            IsActive = true
+        ));
+        insert users;
+    }
+    
+    public static Case testNotificationSetup(Integer num) {
+        List<User> usersEN = [ SELECT Id, IsActive FROM User WHERE LanguageLocaleKey = 'en_US' LIMIT 1 ];
+        List<User> usersRU = [ SELECT Id FROM User WHERE LanguageLocaleKey = 'ru' LIMIT 1 ];
+        
+        System.debug(usersEN);
+        
+        List<Case> casesToTest = new List<Case>();
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU'
+        ));
+        casesToTest.add(new Case(
+        	Status = 'New',
+            Origin = 'Manual',
+            Language__c = 'RU'
+        ));
+        insert casesToTest;
+        
+        return casesToTest[num];
+    }
+    
+    @isTest
+    public static void notificationMessageSet_test_1() {
+        Case duplicateCase = testNotificationSetup(0);
+        
+        Test.startTest();
+        System.assertEquals(
+            'Warning: Case №' + duplicateCase.CaseNumber + ' was closed as a duplicate.', 
+            DuplicateCasesControllerManager.notificationMessageSet(duplicateCase)
+        );
+        Test.stopTest();
+    }
+    
+    @isTest
+    public static void notificationMessageSet_test_2() {
+        Case duplicateCase = testNotificationSetup(1);
+        
+        Test.startTest();
+        System.assertEquals(
+            'Внимание: Обращение №' + duplicateCase.CaseNumber + ' закрыто, как дубликат.', 
+            DuplicateCasesControllerManager.notificationMessageSet(duplicateCase)
+        );
+        Test.stopTest();
     }
 }
