@@ -1,0 +1,53 @@
+@IsTest
+public class ImageCarouselController_Test {
+    @testSetup
+    public static void setup() {
+        List<Car__c> newCars = new List<Car__c>();
+        newCars.add(new Car__c(
+            Name = 'testC',
+            Car_Price__c = 10,
+            Model__c = 'testM'
+        ));
+        insert newCars;
+        
+        Blob versionDataBlob = Blob.valueOf('test'); 
+        
+        ContentVersion contentVersion_1 = new ContentVersion(
+            Title='SampleTitle', 
+            PathOnClient ='SampleTitle.jpg',
+            VersionData = versionDataBlob,
+            origin = 'H'
+        );
+        insert contentVersion_1;
+        
+        ContentVersion contentVersion_2 = [
+            SELECT Id, Title, ContentDocumentId 
+            FROM ContentVersion 
+            WHERE Id = :contentVersion_1.Id 
+            LIMIT 1
+        ];
+        
+        List<ContentDocumentLink> attachedFilesToTest = new List<ContentDocumentLink>();
+        attachedFilesToTest.add(new ContentDocumentLink(
+            LinkedEntityId = newCars[0].Id,
+            ContentDocumentId = contentVersion_2.contentdocumentid,
+            ShareType = 'V'
+        ));
+        insert attachedFilesToTest;
+        
+    }
+    
+	@isTest
+    public static void getCar_Test_1() {
+        List<Car__c> cars = [ SELECT Id FROM Car__c LIMIT 1 ];
+        
+        System.assertEquals(2, ImageCarouselController.getCar(cars[0].Id).size());
+    }
+    
+    @isTest
+    public static void getCar_Test_2() {
+        List<Car__c> cars = [ SELECT Id FROM Car__c LIMIT 1 ];
+        
+        System.assertEquals(0, ImageCarouselController.getCar(null).size());
+    }
+}
