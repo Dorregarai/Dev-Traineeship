@@ -2,63 +2,34 @@
 public class Product2TriggerTest {
     @testSetup
     static void setup() {
-        List<Opportunity> oppsToTest = new List<Opportunity>();
-        List<Product2> prodsToTest = new List<Product2>();
-        List<Product2> prodsToDelete = new List<Product2>();
-        List<OpportunityLineItem> olisToTest = new List<OpportunityLineItem>();
-        List<PricebookEntry> pbsToTest = new List<PricebookEntry>();
-        
-        TriggerSetting__c cs = new TriggerSetting__c();
-        cs.Name = 'Product2Trigger';
-        cs.Is_Active__c = true;
-        insert cs;
-        
-        prodsToTest.add(new Product2(
-            Name = 'TestProd',
-            ProductCode = 'T-ProdD',
-            IsActive = true
-        ));
-        insert prodsToTest;
-        
-        prodsToDelete.add(new Product2(
-            Name = 'TestProdDelete',
-            ProductCode = 'T-Prod',
-            IsActive = true
-        ));
-        insert prodsToDelete;
-        
-        pbsToTest.add(new PricebookEntry(
-            Pricebook2Id = Test.getStandardPricebookId(),
-            Product2Id = prodsToTest[0].Id,
-            UnitPrice = 100,
-            IsActive = true
-        ));
-        insert pbsToTest;
-        
-        oppsToTest.add(new Opportunity(
-            Name = 'test',
-            CloseDate = Date.today() + 1,
-            StageName = 'Prospecting'
-        ));
-        insert oppsToTest;
-        
-        OpportunityLineItem oli = new OpportunityLineItem();
-        
-        for(Opportunity elem : oppsToTest) {
-            oli.OpportunityId = elem.Id;
-            oli.Quantity = 5;
-            oli.PricebookEntryId = pbsToTest[0].Id;
-            oli.TotalPrice = oli.Quantity * pbsToTest[0].UnitPrice;
-        }
-        olisToTest.add(oli);
-        insert olisToTest;
+        SetupTest.insertCustomSettingTrigger();
+        SetupTest.insertAccount();
+        SetupTest.insertOpportunity();
+        SetupTest.insertProduct2();
+        SetupTest.insertPricebookEntry();
+        SetupTest.insertOpportunityLineItem();
     }
     
-	@isTest
-    static void test() {
+    @isTest
+    static void beforeInsert_Test_1() {
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterInsert_Test_1() {
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void beforeUpdate_Test_1() {
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterUpdate_Test_1() {
         List<Product2> prods = new List<Product2>();
         
-        for(Product2 elem : [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ]) {
+        for(Product2 elem : [ SELECT Id, IsActive FROM Product2 WHERE Name = 'TestProd' ]) {
             elem.IsActive = false;
             prods.add(elem);
         }
@@ -67,10 +38,31 @@ public class Product2TriggerTest {
         Integer actualRes = [ SELECT count() From Task WHERE Subject = 'Old model deal!!!' ];
         
         System.assertEquals(1, actualRes);
+    }
+    
+    @isTest
+    static void beforeDelete_Test_1() {
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        delete prodsToDelete;
         
-        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProdDelete' ];
+        System.assertEquals(0, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterDelete_Test_1() {
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        delete prodsToDelete;
+        
+        System.assertEquals(0, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterUndelete_Test_1() {
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
         delete prodsToDelete;
         
         undelete prodsToDelete;
+        
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
     }
 }
