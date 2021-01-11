@@ -1,0 +1,16 @@
+.THIS .page-section {
+    padding: 1rem;
+}
+
+.THIS .page-header {
+    font-size: 25px;
+    font-weight: bold;
+    border-bottom: dotted 2px #ccc;
+    height: 140px;
+}
+
+.THIS .page-header_logo {
+    margin-left: 1rem;
+    max-width: 120px;
+    max-height: 120px;
+}
