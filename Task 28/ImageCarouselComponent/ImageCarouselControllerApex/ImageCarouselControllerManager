@@ -1,9 +1,13 @@
 public class ImageCarouselControllerManager {
-    public static List<Car__c> getCars(Id recordId) {
+    public static List<ContentDocumentLink> getCars(Id carId) {
         List<Car__c> records = [ 
             SELECT Name, Model__c, Car_Price__c
-            FROM Car__c WHERE Id = :recordId ];
+            FROM Car__c 
+            WHERE Id = :carId
+        ];
         
-        return records;
+        List<ContentDocumentLink> attachments = [ SELECT ContentDocumentId FROM ContentDocumentLink WHERE LinkedEntityId = :records[0].Id ];
+        
+        return attachments;
     }
 }
