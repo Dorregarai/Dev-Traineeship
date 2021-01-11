@@ -1,0 +1,20 @@
+.THIS .page-main_card__Block {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 1rem;
+    max-width: 200px;
+    max-height: 350px;
+    min-width: 200px;
+    min-height: 330px;
+}
+
+.THIS .page-main_card__Block :hover {
+    cursor: pointer;
+}
+
+.THIS .page-main_card__Img {
+    border: 0px;
+    border-radius: 5px;
+}
