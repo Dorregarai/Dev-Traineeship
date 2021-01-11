@@ -1,0 +1,92 @@
+@IsTest
+public class Product2TriggerHandler_Test {
+    @testSetup
+    static void setup() {
+        SetupTest.insertCustomSettingTrigger();
+        SetupTest.insertAccount();
+        SetupTest.insertOpportunity();
+        SetupTest.insertProduct2();
+        SetupTest.insertPricebookEntry();
+        SetupTest.insertOpportunityLineItem();
+    }
+    
+    @isTest
+    static void beforeInsert_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        test.beforeInsert(Trigger.new);
+        
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterInsert_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        test.afterInsert(Trigger.new);
+        
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void beforeUpdate_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        test.beforeUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterUpdate_Test_1() {
+        List<Product2> prods = new List<Product2>();
+        
+        for(Product2 elem : [ SELECT Id, IsActive FROM Product2 WHERE Name = 'TestProd' ]) {
+            elem.IsActive = false;
+            prods.add(elem);
+        }
+        update prods;
+        
+        Integer actualRes = [ SELECT count() From Task WHERE Subject = 'Old model deal!!!' ];
+        
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        test.afterUpdate(Trigger.new, Trigger.newMap, Trigger.old, Trigger.oldMap);
+        
+        System.assertEquals(1, actualRes);
+    }
+    
+    @isTest
+    static void beforeDelete_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        delete prodsToDelete;
+        
+        test.beforeDelete(Trigger.old, Trigger.oldMap);
+        
+        System.assertEquals(0, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterDelete_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        delete prodsToDelete;
+        
+        test.afterDelete(Trigger.old, Trigger.oldMap);
+        
+        System.assertEquals(0, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+    
+    @isTest
+    static void afterUndelete_Test_1() {
+        Product2TriggerHandler test = new Product2TriggerHandler();
+        
+        List<Product2> prodsToDelete = [ SELECT Id FROM Product2 WHERE Name = 'TestProd' ];
+        delete prodsToDelete;
+        
+        undelete prodsToDelete;
+        
+        test.afterDelete(Trigger.new, Trigger.newMap);
+        
+        System.assertEquals(1, [ SELECT count() FROM Product2 WHERE Name = 'TestProd' ]);
+    }
+}
