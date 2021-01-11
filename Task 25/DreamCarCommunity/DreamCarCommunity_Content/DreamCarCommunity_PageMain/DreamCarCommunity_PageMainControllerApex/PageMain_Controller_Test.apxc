@@ -1,0 +1,86 @@
+@IsTest
+public class PageMain_Controller_Test {
+    @testSetup
+    public static void setup() {
+        List<TriggerSetting__c> cs = new List<TriggerSetting__c>();
+        cs.add(new TriggerSetting__c(
+            Name = 'Product2Trigger',
+            Is_Active__c = true
+        ));
+        insert cs;
+        
+        List<CurrencyRate__c> crate = new List<CurrencyRate__c>();
+        crate.add(new CurrencyRate__c(
+            Name = 'RUB',
+            Rate_Value__c = 1.2
+        ));
+        crate.add(new CurrencyRate__c(
+            Name = 'USD',
+            Rate_Value__c = 1
+        ));
+        crate.add(new CurrencyRate__c(
+            Name = 'BYN',
+            Rate_Value__c = 1
+        ));
+        insert crate;
+        
+        List<Product2> productsToTest = new List<Product2>();
+        for(Integer i = 0; i < 5; i++) {
+            productsToTest.add(new Product2(
+                Name = 'TestProduct2' + i,
+                ProductCode = 'TestProduct2Code' + i,
+                Model__c = 'TestModel' + i,
+                Year__c = Date.today(),
+                Price__c = 100 + i,
+                IsActive = true
+            ));
+        }
+        
+        insert productsToTest;
+    }
+    
+	@isTest
+    public static void getProducts_Test_1() {
+        System.assertEquals(5, DreamCarCommunity_PageMain_Controller.getProducts(10, '', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_2() {
+        System.assertEquals(5, DreamCarCommunity_PageMain_Controller.getProducts(null, '', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_3() {
+        System.assertEquals(0, DreamCarCommunity_PageMain_Controller.getProducts(null, 'noname', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_4() {
+        System.assertEquals(0, DreamCarCommunity_PageMain_Controller.getProducts(1000, '', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_5() {
+        System.assertEquals(3, DreamCarCommunity_PageMain_Controller.getProducts(102, '', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_6() {
+        System.assertEquals(1, DreamCarCommunity_PageMain_Controller.getProducts(null, 'TestProduct20', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_7() {
+        System.assertEquals(0, DreamCarCommunity_PageMain_Controller.getProducts(102, 'TestProduct20', 'RUB').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_8() {
+        System.assertEquals(5, DreamCarCommunity_PageMain_Controller.getProducts(10, '', 'BYN').size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_9() {
+        System.assertEquals(5, DreamCarCommunity_PageMain_Controller.getProducts(10, '', 'USD').size());
+    }
+}
