@@ -1,0 +1,38 @@
+@IsTest
+public class CarDetails_Manager_Test {
+    @testSetup
+    public static void setup() {
+        TriggerSetting__c cs = new TriggerSetting__c();
+        cs.Name = 'Product2Trigger';
+        cs.Is_Active__c = true;
+        insert cs;
+        
+        List<Product2> productsToTest = new List<Product2>();
+        
+        for(Integer i = 0; i < 5; i++) {
+            productsToTest.add(new Product2(
+                Name = 'TestProduct2' + i,
+                ProductCode = 'TestProduct2Code' + i,
+                Model__c = 'TestModel' + i,
+                Year__c = Date.today(),
+                Price__c = 100 + i,
+                IsActive = true
+            ));
+        }
+        
+        insert productsToTest;
+    }
+    
+	@isTest
+    public static void getProducts_Test_1() {
+        List<Product2> prods = [ SELECT Id FROM Product2 ];
+        Integer randomNumber = Integer.valueof((Math.random() * prods.size()));
+        
+        System.assertEquals(1, CarDetails_Manager.getProducts(prods[randomNumber].Id).size());
+    }
+    
+    @isTest
+    public static void getProducts_Test_2() {
+        System.assertEquals(0, CarDetails_Manager.getProducts(null).size());
+    }
+}
