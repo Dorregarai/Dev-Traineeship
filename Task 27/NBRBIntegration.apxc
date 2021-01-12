@@ -1,38 +1,58 @@
 public class NBRBIntegration {
-    public static HttpResponse getCurrencyRate(String curName) {
+    public static Map<String, Map<String, Object>> getCurrencyRate() {
+        Map<String, Map<String, Object>> resMap = new Map<String, Map<String, Object>>();
+        
         Http http = new Http();
-        HttpRequest req = new HttpRequest();
+        HttpRequest reqRUB = new HttpRequest();
+        HttpRequest reqUSD = new HttpRequest();
+        HttpRequest reqEUR = new HttpRequest();
         
-        String endpoint = 'https://www.nbrb.by/api/exrates/rates/';
+        String endpointRUB = 'https://www.nbrb.by/api/exrates/rates/298';
+        String endpointUSD = 'https://www.nbrb.by/api/exrates/rates/145';
+        String endpointEUR = 'https://www.nbrb.by/api/exrates/rates/292';
         
-        switch on curName {
-            when 'RUB' { endpoint += '298'; }
-            when 'USD' { endpoint += '145'; }
-            when 'EUR' { endpoint += '292'; }
-        }
+        reqRUB.setEndpoint(endpointRUB);
+        reqRUB.setMethod('GET');
         
-        req.setEndpoint(endpoint);
-        req.setMethod('GET');
+        reqUSD.setEndpoint(endpointUSD);
+        reqUSD.setMethod('GET');
         
-        HttpResponse res = http.send(req);
+        reqEUR.setEndpoint(endpointEUR);
+        reqEUR.setMethod('GET');
         
-        Map<String, Object> results = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
-        Decimal rate = (Decimal) results.get('Cur_OfficialRate');
+        HttpResponse resRUB = http.send(reqRUB);
+        HttpResponse resUSD = http.send(reqUSD);
+        HttpResponse resEUR = http.send(reqEUR);
         
-		setCurrencyRate(curName, rate);
+        resMap.put('RUB', (Map<String, Object>) JSON.deserializeUntyped(resRUB.getBody()));
+        resMap.put('USD', (Map<String, Object>) JSON.deserializeUntyped(resUSD.getBody()));
+        resMap.put('EUR', (Map<String, Object>) JSON.deserializeUntyped(resEUR.getBody()));
         
-        return res;
+        return resMap;
     }
     
-    public static void setCurrencyRate(String curName, Decimal rate) {
+    public static void setCurrencyRate() {
         List<CurrencyRate__c> currenciesToUpdate = [ 
-            SELECT Id, Name, Rate_Value__c 
-            FROM CurrencyRate__c WHERE Name = :curName 
+            SELECT Name, Rate_Value__c
+            FROM CurrencyRate__c 
+            WHERE Name != 'BYN'
         ];
+            System.debug(currenciesToUpdate);
         
-        if(curName == 'RUB') { rate = rate / 100; }
+        Map<String, Map<String, Object>> response = getCurrencyRate();
         
-        currenciesToUpdate[0].Rate_Value__c = rate;
+        for(CurrencyRate__c elem : currenciesToUpdate) {
+            Decimal rate = (Decimal) response.get(elem.Name).get('Cur_OfficialRate');
+            Integer scale = (Integer) response.get(elem.Name).get('Cur_Scale');
+            
+            elem.Rate_Value__c = rate / scale;
+            
+        }
         update currenciesToUpdate;
+    }
+    
+    @future(callout=true)
+    public static void fetchCurrencyRates() {
+        setCurrencyRate();
     }
 }
