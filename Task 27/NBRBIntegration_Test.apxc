@@ -31,7 +31,7 @@ public class NBRBIntegration_Test {
         );
         
         Test.startTest();
-        HttpResponse response = NBRBIntegration.setCurrencyRate();
+        NBRBIntegration.setCurrencyRate();
         Test.stopTest();
         
         System.assertEquals(1.1 / 100, [ SELECT Rate_Value__c FROM CurrencyRate__c WHERE Name = 'RUB' ].Rate_Value__c);
@@ -53,7 +53,7 @@ public class NBRBIntegration_Test {
         );
         
         Test.startTest();
-        HttpResponse response = NBRBIntegration.setCurrencyRate();
+        NBRBIntegration.setCurrencyRate();
         Test.stopTest();
         
         System.assertEquals(2.1, [ SELECT Rate_Value__c FROM CurrencyRate__c WHERE Name = 'USD' ].Rate_Value__c);
@@ -75,7 +75,7 @@ public class NBRBIntegration_Test {
         );
         
         Test.startTest();
-        HttpResponse response = NBRBIntegration.setCurrencyRate();
+        NBRBIntegration.setCurrencyRate();
         Test.stopTest();
         
         System.assertEquals(3.1, [ SELECT Rate_Value__c FROM CurrencyRate__c WHERE Name = 'EUR' ].Rate_Value__c);
