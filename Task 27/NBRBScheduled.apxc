@@ -1,7 +1,5 @@
 global class NBRBScheduled implements Schedulable {
     global void execute(SchedulableContext sc) {
-        NBRBIntegration.getCurrencyRate('RUB');
-        NBRBIntegration.getCurrencyRate('USD');
-        NBRBIntegration.getCurrencyRate('EUR');
+        NBRBIntegration.fetchCurrencyRates();
     }
 }
