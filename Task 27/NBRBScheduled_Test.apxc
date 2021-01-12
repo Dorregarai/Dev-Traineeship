@@ -11,7 +11,7 @@ public class NBRBScheduled_Test {
     
 	@isTest
     static void execute_Test_1() {
-        String CRON_EXP = '0 0 23 11 1 ? 2021';
+        String CRON_EXP = '0 0 23 15 1 ? 2021';
         
         Map<String, String> header = new Map<String, String>();
         header.put('Content-Type', 'application/json');
@@ -21,13 +21,12 @@ public class NBRBScheduled_Test {
             new SingleCalloutMock(
                 200, 
                 'Complete', 
-                '{"Cur_ID": 298, "Cur_OfficialRate": 1.1}', 
+                '{"Cur_ID": 298, "Cur_OfficialRate": 1.1, "Cur_Scale": 100}', 
                 header
             )
         );
         
         Test.startTest();
-        HttpResponse response = NBRBIntegration.getCurrencyRate('RUB');
         System.schedule(
             'GetCurrencyFromNBRBScheduledJobTest', 
             CRON_EXP, 
